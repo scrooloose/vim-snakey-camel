@@ -48,5 +48,6 @@ Put your cursor on a word and do one of the following:
 <leader>sC   --> convert to upper camel case
 <leader>sk   --> convert to kebab case
 <leader>sK   --> convert to screaming kebab case
+<leader>s.   --> cycle through the most common cases - use once then repeat with (dot)
 . (dot)      --> repeat last conversion (requires repeat.vim)
 ```

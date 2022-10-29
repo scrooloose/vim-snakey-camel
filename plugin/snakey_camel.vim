@@ -3,93 +3,121 @@ if exists('g:loaded_snakey_camel')
 endif
 let g:loaded_snakey_camel = 1
 
-nnoremap <plug>SnakeyCamelToSnake
-    \ :call <SID>Convert("ToSnake")<cr>
-nnoremap <plug>SnakeyCamelToScreamingSnake
-    \ :call <SID>Convert("ToScreamingSnake")<cr>
+let s:SNAKE = "Snake"
+let s:SCREAMING_SNAKE = "ScreamingSnake"
+let s:CAMEL = "Camel"
+let s:UPPER_CAMEL = "UpperCamel"
+let s:KEBAB = "Kebab"
+let s:SCREAMING_KEBAB = "ScreamingKebab"
+let s:NEXT_IN_CYCLE = "NextInCycle"
 
-nnoremap <plug>SnakeyCamelToCamel
-    \ :call <SID>Convert("ToCamel")<cr>
-nnoremap <plug>SnakeyCamelToUpperCamel
-    \ :call <SID>Convert("ToUpperCamel")<cr>
+exec "nnoremap <plug>SnakeyCamelToSnake " .
+    \ ":call <SID>Convert(\"" . s:SNAKE . "\")<cr>"
+exec "nnoremap <plug>SnakeyCamelToScreamingSnake " .
+    \ ":call <SID>Convert(\"" . s:SCREAMING_SNAKE ."\")<cr>"
 
-nnoremap <plug>SnakeyCamelToKebab
-    \ :call <SID>Convert("ToKebab")<cr>
-nnoremap <plug>SnakeyCamelToScreamingKebab
-    \ :call <SID>Convert("ToScreamingKebab")<cr>
+exec "nnoremap <plug>SnakeyCamelToCamel ".
+    \ ":call <SID>Convert(\"" . s:CAMEL . "\")<cr>"
+exec "nnoremap <plug>SnakeyCamelToUpperCamel " .
+    \ ":call <SID>Convert(\"" . s:UPPER_CAMEL . "\")<cr>"
 
-nmap <leader>ss <plug>SnakeyCamelToSnake
-nmap <leader>sS <plug>SnakeyCamelToScreamingSnake
-nmap <leader>sc <plug>SnakeyCamelToCamel
-nmap <leader>sC <plug>SnakeyCamelToUpperCamel
-nmap <leader>sk <plug>SnakeyCamelToKebab
-nmap <leader>sK <plug>SnakeyCamelToScreamingKebab
+exec "nnoremap <plug>SnakeyCamelToKebab " .
+    \ ":call <SID>Convert(\"" . s:KEBAB . "\")<cr>"
+exec "nnoremap <plug>SnakeyCamelToScreamingKebab " .
+    \ ":call <SID>Convert(\"" . s:SCREAMING_KEBAB . "\")<cr>"
 
-function! s:Convert(convertFunc) abort
+exec "nnoremap <plug>SnakeyCamelToNextInCycle " .
+    \ ":call <SID>Convert(\"" . s:NEXT_IN_CYCLE . "\")<cr>"
+
+nmap <unique> <leader>ss <plug>SnakeyCamelToSnake
+nmap <unique> <leader>sS <plug>SnakeyCamelToScreamingSnake
+nmap <unique> <leader>sc <plug>SnakeyCamelToCamel
+nmap <unique> <leader>sC <plug>SnakeyCamelToUpperCamel
+nmap <unique> <leader>sk <plug>SnakeyCamelToKebab
+nmap <unique> <leader>sK <plug>SnakeyCamelToScreamingKebab
+nmap <unique> <leader>s. <plug>SnakeyCamelToNextInCycle
+
+function! s:Convert(convertTo) abort
     let oldIskeyword = &iskeyword
     set iskeyword+=-
     let cword = expand("<cword>")
     let oldPos = getpos(".")
 
     try
-        let replacement = call("s:" . a:convertFunc, [cword])
+        let replacement = s:ConvertWord(cword, a:convertTo)
         exec "normal ciw" . replacement
         call setpos(".", oldPos)
-        silent! call repeat#set("\<plug>SnakeyCamel" . a:convertFunc)
+        silent! call repeat#set("\<plug>SnakeyCamelTo" . a:convertTo)
     finally
         exec 'set iskeyword=' . oldIskeyword
     endtry
 endfunction
 
-function! s:ToCamel(word) abort
-    let result = s:ConvertAnythingToSnake(a:word)
-    return substitute(result, '_\(\U\)', '\u\1', 'g')
-endfunction
+function! s:ConvertWord(word, to) abort
+    let snaked = s:ConvertAnythingToSnake(a:word)
 
-function! s:ToUpperCamel(word) abort
-    return substitute(s:ToCamel(a:word), '^\(\U\)', '\u\1', '')
-endfunction
-
-function! s:ToSnake(word) abort
-    return s:ConvertAnythingToSnake(a:word)
-endfunction
-
-function s:ToScreamingSnake(word) abort
-    return toupper(s:ToSnake(a:word))
-endfunction
-
-function! s:ToKebab(word) abort
-    let result = s:ConvertAnythingToSnake(a:word)
-    return substitute(result, '_', '-', 'g')
-endfunction
-
-function s:ToScreamingKebab(word) abort
-    return toupper(s:ToKebab(a:word))
-endfunction
-
-" Simplify other conversion functions by using snake case as our base format
-function! s:ConvertAnythingToSnake(word) abort
-    " standard snake
-    if a:word =~ '\C^[a-z_]\+ \?$'
-        return a:word
+    if a:to == s:SNAKE
+        return snaked
+    elseif a:to == s:SCREAMING_SNAKE
+        return toupper(snaked)
+    elseif a:to == s:CAMEL
+        return substitute(snaked, '_\(\U\)', '\u\1', 'g')
+    elseif a:to == s:UPPER_CAMEL
+        let result = substitute(snaked, '_\(\U\)', '\u\1', 'g')
+        return substitute(result, '^\(\U\)', '\u\1', '')
+    elseif a:to == s:KEBAB
+        return substitute(snaked, '_', '-', 'g')
+    elseif a:to == s:SCREAMING_KEBAB
+        return toupper(substitute(snaked, '_', '-', 'g'))
+    elseif a:to == s:NEXT_IN_CYCLE
+        let nextCase = s:CycledCaseFor(a:word)
+        return s:ConvertWord(a:word, nextCase)
+    else
+        throw "SnakeyCamel: Invalid 'to' param: " . a:to
     endif
+endfunction
 
-    " screaming snake
-    if a:word =~ '\C^[A-Z_]\+ \?$'
+function! s:ConvertAnythingToSnake(word) abort
+    let wordCase = s:GetCaseFor(a:word)
+
+    if wordCase == s:SNAKE || wordCase == s:SCREAMING_SNAKE
         return tolower(a:word)
     endif
 
-    " camel case (standard and leading cap)
-    if a:word =~ '^[A-Za-z]\+ \?$'
+    if wordCase == "camel" || wordCase == s:UPPER_CAMEL
         let result = substitute(a:word, '\(\u\)', '_\L\1', 'g')
         let result = substitute(result, '^_', '', '')
         return result
     endif
 
-    " kebab
-    if a:word =~ '^[A-Za-z\-]\+ \?$'
+    if wordCase ==  s:KEBAB|| wordCase == s:SCREAMING_KEBAB
         return tolower(substitute(a:word, '-', '_', 'g'))
     endif
+endfunction
 
-    throw 'snakey camel: unrecognized word format'
+function s:GetCaseFor(word) abort
+    if a:word =~ '\C^[a-z_]\+$' | return s:SNAKE | endif
+    if a:word =~ '\C^[A-Z_]\+$' | return s:SCREAMING_SNAKE | endif
+    if a:word =~ '\C^[A-Z][A-Za-z]\+$' | return s:UPPER_CAMEL | endif
+    if a:word =~ '\C^[a-z][A-Za-z]\+$' | return s:CAMEL | endif
+    if a:word =~ '\C^[a-z][A-Za-z\-]\+$' | return s:KEBAB | endif
+    if a:word =~ '\C^[A-Z][A-Za-z\-]\+$' | return s:SCREAMING_KEBAB | endif
+
+    throw 'SnakeyCamel: unrecognized word format'
+endfunction
+
+let s:cycledCaseOrder = [s:SNAKE, s:SCREAMING_SNAKE, s:CAMEL, s:KEBAB]
+function! s:CycledCaseFor(word) abort
+    let wordCase = s:GetCaseFor(a:word)
+    let idx = index(s:cycledCaseOrder, wordCase)
+
+    if idx == -1
+        return s:cycledCaseOrder[0]
+    endif
+
+    if idx + 1 >= len(s:cycledCaseOrder)
+        return s:cycledCaseOrder[0]
+    endif
+
+    return s:cycledCaseOrder[idx + 1]
 endfunction
