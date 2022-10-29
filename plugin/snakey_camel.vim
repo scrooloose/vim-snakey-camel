@@ -11,31 +11,24 @@ let s:KEBAB = "Kebab"
 let s:SCREAMING_KEBAB = "ScreamingKebab"
 let s:NEXT_IN_CYCLE = "NextInCycle"
 
-exec "nnoremap <plug>SnakeyCamelToSnake " .
-    \ ":call <SID>Convert(\"" . s:SNAKE . "\")<cr>"
-exec "nnoremap <plug>SnakeyCamelToScreamingSnake " .
-    \ ":call <SID>Convert(\"" . s:SCREAMING_SNAKE ."\")<cr>"
+function! s:CreateMapsFor(convertTo, key)
+    exec "nnoremap <plug>SnakeyCamelTo" . a:convertTo .
+        \ " :call <SID>Convert(\"" . a:convertTo . "\")<cr>"
 
-exec "nnoremap <plug>SnakeyCamelToCamel ".
-    \ ":call <SID>Convert(\"" . s:CAMEL . "\")<cr>"
-exec "nnoremap <plug>SnakeyCamelToUpperCamel " .
-    \ ":call <SID>Convert(\"" . s:UPPER_CAMEL . "\")<cr>"
+    let mapLHS = "<leader>s" . a:key
+    let mapRHS = "<plug>SnakeyCamelTo" . a:convertTo
+    if !hasmapto(mapRHS, 'n') && maparg(mapLHS) == ""
+        exec "nmap ". mapLHS . " " . mapRHS
+    endif
+endfunction
 
-exec "nnoremap <plug>SnakeyCamelToKebab " .
-    \ ":call <SID>Convert(\"" . s:KEBAB . "\")<cr>"
-exec "nnoremap <plug>SnakeyCamelToScreamingKebab " .
-    \ ":call <SID>Convert(\"" . s:SCREAMING_KEBAB . "\")<cr>"
-
-exec "nnoremap <plug>SnakeyCamelToNextInCycle " .
-    \ ":call <SID>Convert(\"" . s:NEXT_IN_CYCLE . "\")<cr>"
-
-nmap <unique> <leader>ss <plug>SnakeyCamelToSnake
-nmap <unique> <leader>sS <plug>SnakeyCamelToScreamingSnake
-nmap <unique> <leader>sc <plug>SnakeyCamelToCamel
-nmap <unique> <leader>sC <plug>SnakeyCamelToUpperCamel
-nmap <unique> <leader>sk <plug>SnakeyCamelToKebab
-nmap <unique> <leader>sK <plug>SnakeyCamelToScreamingKebab
-nmap <unique> <leader>s. <plug>SnakeyCamelToNextInCycle
+call s:CreateMapsFor(s:SNAKE, 's')
+call s:CreateMapsFor(s:SCREAMING_SNAKE, 'S')
+call s:CreateMapsFor(s:CAMEL, 'c')
+call s:CreateMapsFor(s:UPPER_CAMEL, 'C')
+call s:CreateMapsFor(s:KEBAB, 'k')
+call s:CreateMapsFor(s:SCREAMING_KEBAB, 'K')
+call s:CreateMapsFor(s:NEXT_IN_CYCLE, '.')
 
 function! s:Convert(convertTo) abort
     let oldIskeyword = &iskeyword

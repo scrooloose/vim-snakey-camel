@@ -38,16 +38,39 @@ Install [repeat.vim](https://github.com/tpope/vim-repeat) to repeat case convers
 
 ![Snakey Camel Demo](https://github.com/scrooloose/vim-snakey-camel/raw/master/demo.gif)
 
-## Mappings
+## Usage
 
-Put your cursor on a word and do one of the following:
+Put your cursor on a word and use the following mappings
+
+| Map          | Converts current word to                                               |
+|--------------|------------------------------------------------------------------------|
+| `<leader>ss` | To snake case                                                          |
+| `<leader>sS` | To upper snake case                                                    |
+| `<leader>sc` | To camel case                                                          |
+| `<leader>sC` | To upper camel case                                                    |
+| `<leader>sk` | To kebab case                                                          |
+| `<leader>sK` | To screaming kebab case                                                |
+| `<leader>s.` | Cycles through the most common cases - use once then repeat with (dot) |
+| `.` (dot)    | repeat last conversion (requires repeat.vim)                           |
+
+## Overriding mappings
+
+If the default mappings don't satisfy you, simply create another mapping and
+the default will go away.
+
+Example:
+```vim
+nmap <leader>XX <Plug>SnakeyCamelToScreamingKebab
 ```
-<leader>ss   --> convert to snake case
-<leader>sS   --> convert to upper snake case
-<leader>sc   --> convert to camel case
-<leader>sC   --> convert to upper camel case
-<leader>sk   --> convert to kebab case
-<leader>sK   --> convert to screaming kebab case
-<leader>s.   --> cycle through the most common cases - use once then repeat with (dot)
-. (dot)      --> repeat last conversion (requires repeat.vim)
-```
+
+See below for a list of the other plug mappings to map to.
+
+| \<Plug\> Map                      |
+|-----------------------------------|
+| <Plug>SnakeyCamelToSnake          |
+| <Plug>SnakeyCamelToScreamingSnake |
+| <Plug>SnakeyCamelToCamel          |
+| <Plug>SnakeyCamelToUpperCamel     |
+| <Plug>SnakeyCamelToKebab          |
+| <Plug>SnakeyCamelToScreamingKebab |
+| <Plug>SnakeyCamelToNextInCycle    |
