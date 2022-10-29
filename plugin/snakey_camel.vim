@@ -100,12 +100,12 @@ function! s:ConvertAnythingToSnake(word) abort
 endfunction
 
 function s:GetCaseFor(word) abort
-    if a:word =~ '\C^[a-z_]\+$' | return s:SNAKE | endif
-    if a:word =~ '\C^[A-Z_]\+$' | return s:SCREAMING_SNAKE | endif
-    if a:word =~ '\C^[A-Z][A-Za-z]\+$' | return s:UPPER_CAMEL | endif
-    if a:word =~ '\C^[a-z][A-Za-z]\+$' | return s:CAMEL | endif
-    if a:word =~ '\C^[a-z][A-Za-z\-]\+$' | return s:KEBAB | endif
-    if a:word =~ '\C^[A-Z][A-Za-z\-]\+$' | return s:SCREAMING_KEBAB | endif
+    if a:word =~ '\C^[a-z0-9_]\+$' | return s:SNAKE | endif
+    if a:word =~ '\C^[A-Z0-9_]\+$' | return s:SCREAMING_SNAKE | endif
+    if a:word =~ '\C^[A-Z][A-Za-z0-9]\+$' | return s:UPPER_CAMEL | endif
+    if a:word =~ '\C^[a-z][A-Za-z0-9]\+$' | return s:CAMEL | endif
+    if a:word =~ '\C^[a-z][A-Za-z0-9\-]\+$' | return s:KEBAB | endif
+    if a:word =~ '\C^[A-Z][A-Za-z0-9\-]\+$' | return s:SCREAMING_KEBAB | endif
 
     throw 'SnakeyCamel: unrecognized word format'
 endfunction
