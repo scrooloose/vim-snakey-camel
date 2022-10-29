@@ -11,6 +11,8 @@ let s:KEBAB = "Kebab"
 let s:SCREAMING_KEBAB = "ScreamingKebab"
 let s:NEXT_IN_CYCLE = "NextInCycle"
 
+let s:CYCLED_CASE_ORDER = [s:SNAKE, s:CAMEL, s:KEBAB]
+
 function! s:CreateMapsFor(convertTo, key)
     exec "nnoremap <plug>SnakeyCamelTo" . a:convertTo .
         \ " :call <SID>Convert(\"" . a:convertTo . "\")<cr>"
@@ -99,18 +101,17 @@ function s:GetCaseFor(word) abort
     throw 'SnakeyCamel: unrecognized word format'
 endfunction
 
-let s:cycledCaseOrder = [s:SNAKE, s:SCREAMING_SNAKE, s:CAMEL, s:KEBAB]
 function! s:CycledCaseFor(word) abort
     let wordCase = s:GetCaseFor(a:word)
-    let idx = index(s:cycledCaseOrder, wordCase)
+    let idx = index(s:CYCLED_CASE_ORDER, wordCase)
 
     if idx == -1
-        return s:cycledCaseOrder[0]
+        return s:CYCLED_CASE_ORDER[0]
     endif
 
-    if idx + 1 >= len(s:cycledCaseOrder)
-        return s:cycledCaseOrder[0]
+    if idx + 1 >= len(s:CYCLED_CASE_ORDER)
+        return s:CYCLED_CASE_ORDER[0]
     endif
 
-    return s:cycledCaseOrder[idx + 1]
+    return s:CYCLED_CASE_ORDER[idx + 1]
 endfunction
