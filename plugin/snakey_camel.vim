@@ -39,9 +39,18 @@ function! s:Convert(convertTo) abort
     let oldPos = getpos(".")
 
     try
+        let caretAdjustment = s:GetCaretAdjustment(
+            \ s:GetCaseFor(cword),
+            \ a:convertTo)
+
         let replacement = s:ConvertWord(cword, a:convertTo)
         exec "normal ciw" . replacement
+
         call setpos(".", oldPos)
+        if caretAdjustment != 0
+            call cursor(line("."), oldPos[2] - caretAdjustment)
+        endif
+
         silent! call repeat#set("\<plug>SnakeyCamelTo" . a:convertTo)
     finally
         exec 'set iskeyword=' . oldIskeyword
@@ -99,6 +108,35 @@ function s:GetCaseFor(word) abort
     if a:word =~ '\C^[A-Z][A-Za-z\-]\+$' | return s:SCREAMING_KEBAB | endif
 
     throw 'SnakeyCamel: unrecognized word format'
+endfunction
+
+" When we move to or from camel case, the length of the word changes. Return
+" the number of chars we need to move left or right to keep the cursor on the
+" same letter (negative numbers move right)
+function! s:GetCaretAdjustment(caseFrom, caseTo)
+    let cword = expand("<cword>")
+    let cursorCol = getpos(".")[2]
+    let wordStartCol = searchpos('\<', 'bnc')[1]
+    let wordBeforeCursor = getline(".")[wordStartCol-1:cursorCol-1]
+    let caseTo = a:caseTo == s:NEXT_IN_CYCLE
+        \ ? s:CycledCaseFor(cword)
+        \ : a:caseTo
+
+    " to camel from snake or kebab - word shortens
+    if caseTo == s:CAMEL || caseTo == s:UPPER_CAMEL
+        if a:caseFrom != s:CAMEL && a:caseFrom != s:UPPER_CAMEL
+            let adjustment = len(substitute(wordBeforeCursor, '[^_-]', '', 'g'))
+            return adjustment
+        endif
+    endif
+
+    " from camel to snake or kebab - word lengthens
+    if a:caseFrom == s:CAMEL || a:caseFrom == s:UPPER_CAMEL
+        if caseTo != s:CAMEL && caseTo != s:UPPER_CAMEL
+            let adjustment = len(substitute(strpart(wordBeforeCursor, 1), '\C[^A-Z]', '', 'g'))
+            return -adjustment
+        endif
+    endif
 endfunction
 
 function! s:CycledCaseFor(word) abort
