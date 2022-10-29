@@ -79,7 +79,7 @@ function! s:ConvertAnythingToSnake(word) abort
         return tolower(a:word)
     endif
 
-    if wordCase == "camel" || wordCase == s:UPPER_CAMEL
+    if wordCase == s:CAMEL || wordCase == s:UPPER_CAMEL
         let result = substitute(a:word, '\(\u\)', '_\L\1', 'g')
         let result = substitute(result, '^_', '', '')
         return result
